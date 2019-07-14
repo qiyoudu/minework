@@ -88,7 +88,13 @@
             icon="el-icon-edit"
             circle
           ></el-button>
-          <el-button size="small" type="danger" icon="el-icon-delete" circle></el-button>
+          <el-button
+            size="small"
+            type="danger"
+            @click="delInfo(scope)"
+            icon="el-icon-delete"
+            circle
+          ></el-button>
           <el-button type="primary" icon="el-icon-edit" plain>主要按钮</el-button>
         </template>
       </el-table-column>
@@ -138,6 +144,29 @@ export default {
     }
   },
   methods: {
+    async delInfo ({ row }) {
+      // console.log(1)
+      console.log(row.id)
+      console.log(row)
+      // 发送ajax  需要有提示框
+      try {
+        await this.$confirm('此次操作将永久删除用户,是否继续', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+        const res = await this.axios.delete(`users/${row.id}`)
+        console.log(res)
+        this.$message.success(res.meta.msg)
+        this.render()
+      } catch (e) {
+        // 这里取代了catch
+        this.$message({
+          type: 'info',
+          message: '取消操作'
+        })
+      }
+    },
     addInfo () {
       this.dialogFormVisible = true
       // 清空信息
@@ -151,8 +180,7 @@ export default {
     async onEditSumbmit () {
       try {
         // 这里面是 同步执行的 都是成功后的结果 继续往下执行 await 后面是promise对象 等待他成功继续执行 如果错误就停止执行 这里try catch捕捉错误信息
-        const v = await this.$refs.editRuleForm.validate()
-        console.log(v)
+        await this.$refs.editRuleForm.validate()
 
         // 发送ajax
         let { id } = this.form
@@ -191,7 +219,6 @@ export default {
           pagesize: 2
         }
       })
-      console.log(res)
       const { data, meta } = res
       if (meta.status === 200) {
         this.tableData = data.users

@@ -55,9 +55,7 @@ export default {
     return {}
   },
   methods: {
-    handleOpen (key, keyPath) {
-      console.log(key, keyPath)
-    },
+    handleOpen (key, keyPath) {},
     handleClose (key, keyPath) {
       console.log(key, keyPath)
     },
