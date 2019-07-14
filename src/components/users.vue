@@ -76,7 +76,12 @@
       </el-table-column>
       <el-table-column label="用户状态">
         <template slot-scope="scope">
-          <el-switch v-model="scope.row.mg_state" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+          <el-switch
+            @change="changeStatus(scope)"
+            v-model="scope.row.mg_state"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+          ></el-switch>
         </template>
       </el-table-column>
       <el-table-column label="操作">
@@ -100,6 +105,15 @@
       </el-table-column>
     </el-table>
     <!-- 分页器-->
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="1"
+      :page-sizes="[2, 4, 6, 8]"
+      :page-size="total"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total"
+    ></el-pagination>
   </div>
 </template>
 
@@ -108,6 +122,9 @@ export default {
   data () {
     return {
       // 这里面的数据名不能重复
+      total: 5,
+      pagenum: 1,
+      pagesize: 2,
       editDialog: false,
       dialogFormVisible: false,
       tableData: [],
@@ -144,6 +161,34 @@ export default {
     }
   },
   methods: {
+    handleSizeChange (val) {
+      // console.log(`每页 ${val} 条`)
+      this.pagesize = val
+      this.render()
+    },
+    handleCurrentChange (val) {
+      // console.log(`当前页: ${val}`)
+      // 发送ajax 渲染对应的页数
+      // console.log(val)
+
+      this.pagenum = val
+      this.render()
+    },
+    async changeStatus ({ row }) {
+      // console.log(1)/message
+      // 发送axios
+      // console.log(row.mg_state)
+
+      // console.log(row.id)
+      // console.log(row.status);
+      try {
+        await this.axios.put(`users/${row.id}/state/${row.mg_state}`)
+        this.$message.success('修改成功')
+        this.render()
+      } catch (e) {
+        this.$message.error('修改失败')
+      }
+    },
     async delInfo ({ row }) {
       // console.log(1)
       console.log(row.id)
@@ -160,7 +205,7 @@ export default {
         this.$message.success(res.meta.msg)
         this.render()
       } catch (e) {
-        // 这里取代了catch
+        // 这里取代了上面的catch
         this.$message({
           type: 'info',
           message: '取消操作'
@@ -215,13 +260,14 @@ export default {
       const res = await this.axios.get(`users`, {
         params: {
           query: this.query,
-          pagenum: 1,
-          pagesize: 2
+          pagenum: this.pagenum,
+          pagesize: this.pagesize
         }
       })
       const { data, meta } = res
       if (meta.status === 200) {
         this.tableData = data.users
+        this.total = data.total
       }
     },
     handleEdit (index, row) {
@@ -249,7 +295,7 @@ export default {
           this.$message(meta.msg)
         }
       } catch (e) {
-        // 为啥必须要有e?
+        // 为啥必须要有e? 需要指定错误类型
         this.$message.error('创建失败')
       }
     }
