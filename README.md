@@ -27,4 +27,5 @@ yarn run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
-### 数据库
+### 启动
+启动数据库  启动phpstudy 在根目录下输入http-server   
